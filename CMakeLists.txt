@@ -1,11 +1,8 @@
-﻿# CMakeList.txt : CMake project for Daemon, include source and define
-# project specific logic here.
-#
+﻿#cmake - wybór elementów do kompilacji
 cmake_minimum_required (VERSION 3.8)
 
 project ("Daemon")
+set (CMAKE_CXX_STANDARD 17)
 
-# Add source to this project's executable.
-add_executable (Daemon "Daemon.c" "Daemon.h")
+add_executable (Daemon "Daemon.c" "Headers.h")
 
-# TODO: Add tests and install targets if needed.
