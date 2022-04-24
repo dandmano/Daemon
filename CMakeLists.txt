@@ -4,5 +4,5 @@ cmake_minimum_required (VERSION 3.8)
 project ("Daemon")
 set (CMAKE_CXX_STANDARD 17)
 
-add_executable (Daemon "Daemon.c" "Headers.h")
+add_executable (Daemon "Daemon.c" "Daemon.h" "Functions.c" "Functions.h" "Utilites.c" "Utilites.h")
 

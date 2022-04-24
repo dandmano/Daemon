@@ -2,20 +2,20 @@
   "version": "0.2.1",
   "defaults": {},
   "configurations": [
-      {
-        "type": "cppgdb",
-        "name": "Daemon with args",
-        "project": "CMakeLists.txt",
-        "projectTarget": "Daemon",
-        "comment": "Looking for files Daemon",
-        "debuggerConfiguration": "gdb",
-        "args": [
-          "-b 16384",
-          "-s 10",
-          "~/directory",
-          "~/kopia"
-        ],
-        "env": {}
-      }
+    {
+      "type": "cppgdb",
+      "name": "Daemon with args",
+      "project": "CMakeLists.txt",
+      "projectTarget": "Daemon",
+      "comment": "Looking for files Daemon",
+      "debuggerConfiguration": "gdb",
+      "args": [
+        "-v",
+        "-s 30",
+        "siemank",
+        "costam"
+      ],
+      "env": {}
+    }
   ]
 }
