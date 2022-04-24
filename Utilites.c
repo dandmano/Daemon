@@ -1,13 +1,5 @@
 #include "Utilites.h"
 
-//Funkcja zwraca nazwê aktualnie przegl¹danego pliku
-char* get_filename(struct dirent* dp)
-{
-	char* filename = malloc(strlen(dp->d_name)*sizeof(char));
-	strcpy(filename, dp->d_name);
-	return filename;
-}
-
 //Funkcja sprawdza czy plik ma prawa odczytu i pisania dla grupy
 int check_file_perm(const struct stat path_stat)
 {
@@ -18,32 +10,19 @@ int check_file_perm(const struct stat path_stat)
 	return 0;
 }
 
+//Funkcja zwraca 1 je¿eli element jest katalogiem i 0 w przeciwnym wypadku
 int is_directory(const struct stat path_stat) {
 	return S_ISDIR(path_stat.st_mode);
 }
 
+//Funkcja wypisuj¹ca wymagane dane do sysloga
 void log_success(char* fulldir, char* pattern)
 {
+	//Wydobycie i przekonwertowanie czasu i daty na tekst
 	time_t t = time(NULL);
 	struct tm tm = *localtime(&t);
 	char dateandtime[100];
 	sprintf(dateandtime, "%d-%02d-%02d %02d:%02d:%02d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
-	syslog(LOG_INFO, "SUCCESS!\nTime: %s\nFile Directory: %s\nPattern: %s", dateandtime, fulldir, pattern);
-}
-
-char* fix_dir(char* dir) 
-{
-	char* fixed_path = malloc(strlen(dir) + 1);
-	strcpy(fixed_path, dir);
-	strcat(fixed_path, "/");
-	return fixed_path;
-}
-
-char* get_full_dir(char* dir, char* filename)
-{
-	char* fulldir = malloc(strlen(dir) + strlen(filename) + 1);
-	strcpy(fulldir, dir);
-	strcat(fulldir, "/");
-	strcat(fulldir, filename);
-	return fulldir;
+	//Wypisanie informacji o znalezieniu pasuj¹cej nazwy do sysloga
+	syslog(LOG_INFO, "SUCCESS!   Time: %s   File Directory: %s   Pattern: %s", dateandtime, fulldir, pattern);
 }

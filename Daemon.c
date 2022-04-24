@@ -5,12 +5,26 @@
 // tail -f /var/log/syslog | grep --line-buffered Daemon  - komenda do oglądania logów
 //"Usage: %s [-v] [-s sleeptimeinsec] substring1 substring2 ..."
 
+int is_sleeping = 0;
+
+void signal_handler(int signum)
+{
+	if (signum == SIGUSR1)
+	{
+		if (is_sleeping == 1)
+		{
+			is_sleeping = 0;
+			syslog(LOG_INFO, "Daemon Awoken.");
+		}
+	}
+}
+
 int main(int argc, char* argv[]) {
 	
 	//Sprawdzenie czy zostały podane wszystkie wymagane argumenty
 	if (argc < 2) 
 	{
-		syslog(LOG_INFO, "ERROR! Not enough arguments");
+		fprintf(stderr, "Usage: %s [-v] [-s sleeptimeinsec] substring1 substring2 ...\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
@@ -31,17 +45,17 @@ int main(int argc, char* argv[]) {
 		case 's': //argument czasu uśpienia
 			tmp = atoi(optarg);
 			if (tmp <= 0) {
-				syslog(LOG_INFO, "ERROR! Expected sleep time value after -s argument");
+				fprintf(stderr, "Expected value after -s. Example -s 30\n");
 				exit(EXIT_FAILURE);
 			}
 			sleep_time = tmp;
 			break;
 		default:
-			syslog(LOG_INFO, "optget default c=%d", c);
+			fprintf(stderr, "Usage: %s [-v] [-s sleeptimeinsec] substring1 substring2 ...\n", argv[0]);
 			exit(EXIT_FAILURE);
 		}
 	}
-	/*
+	
 	//Utworzenie nowego procesu potomnego
 	pid_t pid = fork();
 
@@ -64,13 +78,13 @@ int main(int argc, char* argv[]) {
 	{
 		syslog(LOG_INFO, "ERROR! Setsid error");
 		exit(EXIT_FAILURE);
-	} */
+	} 
 
 	//Przejście do lokalizacji początkowej
 
 	signal(SIGCHLD, SIG_IGN);
 	signal(SIGHUP, SIG_IGN);
-	signal(SIGABRT, SIG_IGN);
+	signal(SIGUSR1, signal_handler);
 
 	if ((chdir("/home")) < 0) {
 		syslog(LOG_INFO, "ERROR! Directory change error");
@@ -95,24 +109,23 @@ int main(int argc, char* argv[]) {
 	//Pętla główna deamona
 	while (1) {
 		if (details_mode)
-			syslog(LOG_INFO, "Daemon awake. Searching for files with names containg given substrings.");
+			syslog(LOG_INFO, "Searching for files with names containg given substrings.");
 
 		//Dla każdego argumentu wywoływana jest funkcja poszukująca
 		for (int i = optind; i < argc; i++) {
-			syslog(LOG_INFO, "Petla argument numer %d czyli %s ", i, argv[i]);//debug
 			if (search_for_filenames(cwd,argv[i],details_mode) == -1)
 			{
-				syslog(LOG_INFO, "ERROR! Errno number %d",errno);//debug
 				syslog(LOG_INFO, "ERROR! Searching for names exited with -1");
 				exit(EXIT_FAILURE);
 			}
 		}
-		break; //tymczasowo aby nie usuwac ręcznie procesów %%%%
 		if (details_mode)
-			//syslog(LOG_INFO, "Daemon sleeping for %d", sleep_time);
+			syslog(LOG_INFO, "Daemon sleeping for %d", sleep_time);
 
 		//Uśpienie deamona
+		is_sleeping = 1;
 		sleep(sleep_time);
+		is_sleeping = 0;
 	}
 	exit(EXIT_SUCCESS);
 }

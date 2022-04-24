@@ -4,9 +4,8 @@
 //Rekurencyjna funkcja poszukuj¹ca plików posiadaj¹cych podany wzór w nazwie
 int search_for_filenames(char* dir, char* pattern, int details_mode) 
 {
-	syslog(LOG_INFO, "Going to: %s", dir);
 	if ((chdir(dir)) < 0) {
-		syslog(LOG_INFO, "ERROR! Directory change error after recur");
+		syslog(LOG_INFO, "ERROR! Directory change error after enter");
 		exit(EXIT_FAILURE);
 	}
 	//otwarcie folderu
@@ -19,16 +18,18 @@ int search_for_filenames(char* dir, char* pattern, int details_mode)
 
 	//Przechodzenie po ka¿dym pliku/katalogu w folderze
 	struct dirent* dp;
-	char* filename[100];
-	char* fulldir[PATH_MAX];
+	
 	while ((dp = readdir(dfd)) != NULL)
 	{
+		char* filename[FILENAME_MAX];
+		char* fulldir[PATH_MAX];
+
 		//Pozyskanie nazwy aktualnie przegl¹danego pliku
 		strcpy(filename, dp->d_name);
+
 		//Pozyskanie pe³nej œcie¿ki
-		strcpy(fulldir, dir);
-		strcat(fulldir, "/");
-		strcat(fulldir, filename);
+		snprintf(fulldir, sizeof(fulldir), "%s/%s", dir, filename);
+
 		//Pominiêcie zapêtlonych folderów
 		if (strcmp(filename, ".") == 0 || strcmp(filename, "..") == 0)continue;
 
@@ -40,31 +41,37 @@ int search_for_filenames(char* dir, char* pattern, int details_mode)
 			continue;
 		}
 		
-		//Omiñ plik je¿eli grupa nie ma uprawnieñ czytania lub wykonania
-		if (check_file_perm(path_stat))continue;
-
 		//Sprawdzanie katalogów
 		if (is_directory(path_stat))
 		{
+			//Omiñ folder je¿eli grupa nie ma uprawnieñ czytania lub wykonania
+			if (check_file_perm(path_stat))continue;
+
+			//Porównaj nazwê ze wzorem
 			compare_name_with_pattern(fulldir, pattern, filename, details_mode);
+
+			//Rekurencja
 			search_for_filenames(fulldir, pattern, details_mode);
 			if ((chdir(dir)) < 0) {
 				syslog(LOG_INFO, "ERROR! Directory change error after recur");
 				exit(EXIT_FAILURE);
 			}
 		}
-		else
+		else 
 			compare_name_with_pattern(fulldir, pattern, filename, details_mode);
-		closedir(dfd);
+		
 	}
+	closedir(dfd);
 	return 0;
 }
 
+//Funkcja porównuje nazwê pliku ze wzorem z argumentu
 void compare_name_with_pattern(char* fulldir, char* pattern,char* filename,const int details_mode) 
 {
 	if (details_mode)
-		syslog(LOG_INFO, "Comparing '%s' with '%s'", filename, pattern);
+		//syslog(LOG_INFO, "Comparing '%s' with '%s'", filename, pattern);
 
+	//Wypisanie do loga w przypadku znalezienia podci¹gu
 	if (strstr(filename, pattern) != NULL)
 		log_success(fulldir, pattern);
 }
