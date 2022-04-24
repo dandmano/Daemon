@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
 		}
 		break; //tymczasowo aby nie usuwac ręcznie procesów %%%%
 		if (details_mode)
-			syslog(LOG_INFO, "Daemon sleeping for %d", sleep_time);
+			//syslog(LOG_INFO, "Daemon sleeping for %d", sleep_time);
 
 		//Uśpienie deamona
 		sleep(sleep_time);

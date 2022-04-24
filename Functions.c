@@ -19,12 +19,16 @@ int search_for_filenames(char* dir, char* pattern, int details_mode)
 
 	//Przechodzenie po ka¿dym pliku/katalogu w folderze
 	struct dirent* dp;
+	char* filename[100];
+	char* fulldir[PATH_MAX];
 	while ((dp = readdir(dfd)) != NULL)
 	{
 		//Pozyskanie nazwy aktualnie przegl¹danego pliku
-		char* filename = get_filename(dp);
+		strcpy(filename, dp->d_name);
 		//Pozyskanie pe³nej œcie¿ki
-		char* fulldir = get_full_dir(dir, filename);
+		strcpy(fulldir, dir);
+		strcat(fulldir, "/");
+		strcat(fulldir, filename);
 		//Pominiêcie zapêtlonych folderów
 		if (strcmp(filename, ".") == 0 || strcmp(filename, "..") == 0)continue;
 
@@ -56,7 +60,8 @@ int search_for_filenames(char* dir, char* pattern, int details_mode)
 	return 0;
 }
 
-void compare_name_with_pattern(char* fulldir, char* pattern,char* filename,const int details_mode) {
+void compare_name_with_pattern(char* fulldir, char* pattern,char* filename,const int details_mode) 
+{
 	if (details_mode)
 		syslog(LOG_INFO, "Comparing '%s' with '%s'", filename, pattern);
 

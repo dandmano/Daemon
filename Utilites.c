@@ -33,7 +33,7 @@ void log_success(char* fulldir, char* pattern)
 
 char* fix_dir(char* dir) 
 {
-	char* fixed_path = malloc((strlen(dir) + 1) * sizeof(char));
+	char* fixed_path = malloc(strlen(dir) + 1);
 	strcpy(fixed_path, dir);
 	strcat(fixed_path, "/");
 	return fixed_path;
@@ -41,7 +41,7 @@ char* fix_dir(char* dir)
 
 char* get_full_dir(char* dir, char* filename)
 {
-	char* fulldir = malloc((strlen(dir) + strlen(filename) + 1) * sizeof(char));
+	char* fulldir = malloc(strlen(dir) + strlen(filename) + 1);
 	strcpy(fulldir, dir);
 	strcat(fulldir, "/");
 	strcat(fulldir, filename);
