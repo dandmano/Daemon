@@ -41,34 +41,35 @@ int main(int argc, char* argv[])
 		}
 	}
 	
-	////Utworzenie nowego procesu potomnego
-	//pid_t pid = fork();
+	//Utworzenie nowego procesu potomnego
+	pid_t pid = fork();
 
-	////Sprawdzenie czy nie wystąpił bład
-	//if (pid < 0)
-	//{
-	//	syslog(LOG_INFO, "ERROR! Forking error");
-	//	exit(EXIT_FAILURE);
-	//}
+	//Sprawdzenie czy nie wystąpił bład
+	if (pid < 0)
+	{
+		syslog(LOG_INFO, "ERROR! Forking error");
+		exit(EXIT_FAILURE);
+	}
 
-	////Zakończenie działania rodzica
-	//else if (pid > 0)
-	//	exit(EXIT_SUCCESS);
+	//Zakończenie działania rodzica
+	else if (pid > 0)
+		exit(EXIT_SUCCESS);
 
-	////Ustawienie praw dostępu do plików deamona
-	//umask(0);
+	//Ustawienie praw dostępu do plików deamona
+	umask(0);
 
-	////Ustawienie procesu jako lidera sesji, nadanie sid
-	//if (setsid() < 0) 
-	//{cd 
-	//	syslog(LOG_INFO, "ERROR! Setsid error");
-	//	exit(EXIT_FAILURE);
-	//} 
+	//Ustawienie procesu jako lidera sesji, nadanie sid
+	if (setsid() < 0) 
+	{
+		syslog(LOG_INFO, "ERROR! Setsid error");
+		exit(EXIT_FAILURE);
+	} 
 
 	//Obsługa sygnałów
 	signal(SIGCHLD, SIG_IGN);
 	signal(SIGHUP, SIG_IGN);
 	signal(SIGUSR1, signal_handler);
+	signal(SIGUSR2, signal_handler);
 
 	//Zamknięcie standardowych deskryptorów plików
 	close(STDIN_FILENO);
@@ -123,7 +124,6 @@ int main(int argc, char* argv[])
 			signal2_recieved = 0;
 			if (details_mode)
 				syslog(LOG_INFO, "SIGUSR2 recieved, search stopped.");
-			continue;
 		}
 
 		if (details_mode)
