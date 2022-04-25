@@ -52,6 +52,7 @@ int search_for_filenames(char* dir, char* pattern, int details_mode)
 
 			//Rekurencja
 			search_for_filenames(fulldir, pattern, details_mode);
+			//Powrót deamonem do 
 			if ((chdir(dir)) < 0) {
 				syslog(LOG_INFO, "ERROR! Directory change error after recur");
 				exit(EXIT_FAILURE);
@@ -69,7 +70,7 @@ int search_for_filenames(char* dir, char* pattern, int details_mode)
 void compare_name_with_pattern(char* fulldir, char* pattern,char* filename,const int details_mode) 
 {
 	if (details_mode)
-		//syslog(LOG_INFO, "Comparing '%s' with '%s'", filename, pattern);
+		//syslog(LOG_INFO, "Comparing '%s' with '%s'", filename, pattern); //wylaczone do debug
 
 	//Wypisanie do loga w przypadku znalezienia podci¹gu
 	if (strstr(filename, pattern) != NULL)

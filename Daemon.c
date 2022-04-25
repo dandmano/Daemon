@@ -108,6 +108,8 @@ int main(int argc, char* argv[]) {
 
 	//Pętla główna deamona
 	while (1) {
+		//Obudzenie deamona
+		is_sleeping = 0;
 		if (details_mode)
 			syslog(LOG_INFO, "Searching for files with names containg given substrings.");
 
@@ -125,7 +127,6 @@ int main(int argc, char* argv[]) {
 		//Uśpienie deamona
 		is_sleeping = 1;
 		sleep(sleep_time);
-		is_sleeping = 0;
 	}
 	exit(EXIT_SUCCESS);
 }
