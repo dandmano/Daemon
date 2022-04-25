@@ -5,7 +5,7 @@
 int search_for_filenames(char* dir, char* pattern, int details_mode) 
 {
 	if ((chdir(dir)) < 0) {
-		syslog(LOG_INFO, "ERROR! Directory change error after enter");
+		syslog(LOG_INFO, "ERROR! Directory change error after enter %s",dir);
 		exit(EXIT_FAILURE);
 	}
 	//otwarcie folderu
@@ -35,12 +35,14 @@ int search_for_filenames(char* dir, char* pattern, int details_mode)
 
 		//Pozyskanie informacji o pliku
 		struct stat path_stat;
-		if (stat(filename, &path_stat) == -1)
+		if (lstat(filename, &path_stat) == -1)
 		{
 			syslog(LOG_INFO, "Nie mo¿na uzyskaæ informacji na temat pliku %s%s", dir, filename);
 			continue;
 		}
-		
+		//Pomijanie syslinków
+		if (is_syslink(path_stat))continue;
+
 		//Sprawdzanie katalogów
 		if (is_directory(path_stat))
 		{
@@ -58,7 +60,8 @@ int search_for_filenames(char* dir, char* pattern, int details_mode)
 				exit(EXIT_FAILURE);
 			}
 		}
-		else 
+		else
+			//if (is_regular(path_stat))continue;
 			compare_name_with_pattern(fulldir, pattern, filename, details_mode);
 		
 	}

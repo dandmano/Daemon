@@ -13,4 +13,6 @@
 
 int check_file_perm(const struct stat path_stat);
 int is_directory(const struct stat path_stat);
+int is_regular(const struct stat path_stat);
+int is_syslink(const struct stat path_stat);
 void log_success(char* fulldir, char* pattern);

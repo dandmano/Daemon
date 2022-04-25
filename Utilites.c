@@ -5,7 +5,7 @@ int check_file_perm(const struct stat path_stat)
 {
 	mode_t perm = path_stat.st_mode;
 	//nie ma praw
-	if (!(perm & S_IRGRP) || !(perm & S_IXGRP))return 1;
+	if (!(perm & S_IROTH) || !(perm & S_IXOTH))return 1;
 	//ma prawa
 	return 0;
 }
@@ -15,6 +15,13 @@ int is_directory(const struct stat path_stat) {
 	return S_ISDIR(path_stat.st_mode);
 }
 
+int is_regular(const struct stat path_stat) {
+	return (S_ISREG(path_stat.st_mode));
+}
+
+int is_syslink(const struct stat path_stat) {
+	return (S_ISLNK(path_stat.st_mode));
+}
 //Funkcja wypisuj¹ca wymagane dane do sysloga
 void log_success(char* fulldir, char* pattern)
 {

@@ -56,48 +56,47 @@ int main(int argc, char* argv[]) {
 		}
 	}
 	
-	//Utworzenie nowego procesu potomnego
-	pid_t pid = fork();
+	////Utworzenie nowego procesu potomnego
+	//pid_t pid = fork();
 
-	//Sprawdzenie czy nie wystąpił bład
-	if (pid < 0)
-	{
-		syslog(LOG_INFO, "ERROR! Forking error");
-		exit(EXIT_FAILURE);
-	}
+	////Sprawdzenie czy nie wystąpił bład
+	//if (pid < 0)
+	//{
+	//	syslog(LOG_INFO, "ERROR! Forking error");
+	//	exit(EXIT_FAILURE);
+	//}
 
-	//Zakończenie działania rodzica
-	else if (pid > 0)
-		exit(EXIT_SUCCESS);
+	////Zakończenie działania rodzica
+	//else if (pid > 0)
+	//	exit(EXIT_SUCCESS);
 
-	//Ustawienie praw dostępu do plików deamona
-	umask(0);
+	////Ustawienie praw dostępu do plików deamona
+	//umask(0);
 
-	//Ustawienie procesu jako lidera sesji, nadanie sid
-	if (setsid() < 0) 
-	{
-		syslog(LOG_INFO, "ERROR! Setsid error");
-		exit(EXIT_FAILURE);
-	} 
+	////Ustawienie procesu jako lidera sesji, nadanie sid
+	//if (setsid() < 0) 
+	//{
+	//	syslog(LOG_INFO, "ERROR! Setsid error");
+	//	exit(EXIT_FAILURE);
+	//} 
 
-	//Przejście do lokalizacji początkowej
-
+	//Obsługa sygnałów
 	signal(SIGCHLD, SIG_IGN);
 	signal(SIGHUP, SIG_IGN);
 	signal(SIGUSR1, signal_handler);
-
-	if ((chdir("/home")) < 0) {
-		syslog(LOG_INFO, "ERROR! Directory change error");
-		exit(EXIT_FAILURE);
-	}
 
 	//Zamknięcie standardowych deskryptorów plików
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
+	//Przejście do lokalizacji początkowej
+	if ((chdir("/")) < 0) {
+		syslog(LOG_INFO, "ERROR! Directory change error");
+		exit(EXIT_FAILURE);
+	}
 	//Ustawienie ścieżki, w której aktualnie znajduje się daemon
-	char* cwd = "/home";
+	char* cwd = "/";
 
 	//Czyszczenie otwartych deskryptorów plików
 	int x;
