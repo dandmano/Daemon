@@ -22,7 +22,7 @@ void log_success(char* fulldir, char* pattern)
 	time_t t = time(NULL);
 	struct tm tm = *localtime(&t);
 	char dateandtime[100];
-	sprintf(dateandtime, "%d-%02d-%02d %02d:%02d:%02d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	sprintf(dateandtime, "%d-%02d-%02d %02d:%02d:%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 	//Wypisanie informacji o znalezieniu pasuj¹cej nazwy do sysloga
 	syslog(LOG_INFO, "SUCCESS!   Time: %s   File Directory: %s   Pattern: %s", dateandtime, fulldir, pattern);
 }
