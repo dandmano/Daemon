@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
 
 	////Ustawienie procesu jako lidera sesji, nadanie sid
 	//if (setsid() < 0) 
-	//{
+	//{cd 
 	//	syslog(LOG_INFO, "ERROR! Setsid error");
 	//	exit(EXIT_FAILURE);
 	//} 

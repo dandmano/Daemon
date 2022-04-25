@@ -27,8 +27,8 @@ int search_for_filenames(char* dir, char* pattern, int details_mode)
 	{
 		if (signal1_recieved||signal2_recieved)return 0;
 
-		char* filename[FILENAME_MAX];
-		char* fulldir[PATH_MAX];
+		char filename[256];
+		char fulldir[PATH_MAX];
 
 		//Pozyskanie nazwy aktualnie przegl¹danego pliku
 		strcpy(filename, dp->d_name);
