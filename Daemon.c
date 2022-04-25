@@ -1,35 +1,20 @@
 ﻿#include "Daemon.h"
 #include "Functions.h"
+#include "Utilites.h"
 
 //ps -xj | grep Daemon - komenda do sprawdzenia działających procesów
 // tail -f /var/log/syslog | grep --line-buffered Daemon  - komenda do oglądania logów
 //"Usage: %s [-v] [-s sleeptimeinsec] substring1 substring2 ..."
 
-int is_sleeping = 0;
-
-void signal_handler(int signum)
+int main(int argc, char* argv[]) 
 {
-	if (signum == SIGUSR1)
-	{
-		if (is_sleeping == 1)
-		{
-			is_sleeping = 0;
-			syslog(LOG_INFO, "Daemon Awoken.");
-		}
-	}
-}
 
-int main(int argc, char* argv[]) {
-	
 	//Sprawdzenie czy zostały podane wszystkie wymagane argumenty
 	if (argc < 2) 
 	{
 		fprintf(stderr, "Usage: %s [-v] [-s sleeptimeinsec] substring1 substring2 ...\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
-
-	int details_mode = 0; //-v tryb wyświetlający szczegóły
-	int sleep_time = 120; //czas uśpienia daemona, domyślnie 120s
 
 	int c;
 	int tmp;
@@ -91,7 +76,8 @@ int main(int argc, char* argv[]) {
 	close(STDERR_FILENO);
 
 	//Przejście do lokalizacji początkowej
-	if ((chdir("/")) < 0) {
+	if ((chdir("/")) < 0) 
+	{
 		syslog(LOG_INFO, "ERROR! Directory change error");
 		exit(EXIT_FAILURE);
 	}
@@ -119,7 +105,27 @@ int main(int argc, char* argv[]) {
 				syslog(LOG_INFO, "ERROR! Searching for names exited with -1");
 				exit(EXIT_FAILURE);
 			}
+			if (signal1_recieved || signal2_recieved)break;
 		}
+		
+		//W przypadku otrzymania sigusr1, przeszukiwanie się restartuje
+		if (signal1_recieved) 
+		{
+			signal1_recieved = 0;
+			if (details_mode)
+				syslog(LOG_INFO, "Search restart.");
+			continue;
+		}
+
+		//W przypadku otrzymania sigusr2, przeszukiwanie się kończy i daemon się usypia
+		if (signal2_recieved)
+		{
+			signal2_recieved = 0;
+			if (details_mode)
+				syslog(LOG_INFO, "SIGUSR2 recieved, search stopped.");
+			continue;
+		}
+
 		if (details_mode)
 			syslog(LOG_INFO, "Daemon sleeping for %d", sleep_time);
 

@@ -11,8 +11,8 @@
       "debuggerConfiguration": "gdb",
       "args": [
         "-v",
-        "-s 300",
-        "siema",
+        "-s 10",
+        "argument",
         "costam",
         "lol"
       ],
