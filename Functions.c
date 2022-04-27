@@ -4,19 +4,16 @@
 //Rekurencyjna funkcja poszukuj¹ca plików posiadaj¹cych podany wzór w nazwie
 int search_for_filenames(char* dir, char* pattern, int details_mode) 
 {
-	//Sprawdzenie, czy nie otrzymano sygna³u 
-	if (signal1_recieved||signal2_recieved)return 0;
-
 	//Przejœcie deamonem do aktualnie przegl¹danej lokalizacji
 	if ((chdir(dir)) < 0) {
-		syslog(LOG_INFO, "ERROR! Directory change error after enter %s",dir);
+		syslog(LOG_INFO, "ERROR! Process %d Directory change error after enter %s",curr_pid,dir);
 		exit(EXIT_FAILURE);
 	}
 	//Otwarcie folderu
 	DIR* dfd;
 	if ((dfd = opendir(dir)) == NULL)
 	{
-		syslog(LOG_INFO, "ERROR! Nie mo¿na otworzyæ folderu: %s", dir);
+		syslog(LOG_INFO, "ERROR! Process %d,  Nie mo¿na otworzyæ folderu: %s",curr_pid, dir);
 		return -1;
 	}
 
@@ -43,7 +40,7 @@ int search_for_filenames(char* dir, char* pattern, int details_mode)
 		struct stat path_stat;
 		if (lstat(filename, &path_stat) == -1)
 		{
-			syslog(LOG_INFO, "Nie mo¿na uzyskaæ informacji na temat pliku %s%s", dir, filename);
+			syslog(LOG_INFO, "Process %d Nie mo¿na uzyskaæ informacji na temat pliku %s%s",curr_pid, dir, filename);
 			continue;
 		}
 		//Pomijanie syslinków
@@ -63,7 +60,7 @@ int search_for_filenames(char* dir, char* pattern, int details_mode)
 
 			//Powrót deamonem do lokalizacji z przed rekurencji
 			if ((chdir(dir)) < 0) {
-				syslog(LOG_INFO, "ERROR! Directory change error after recur %s",dir);
+				syslog(LOG_INFO, "ERROR! Process %d Directory change error after recur %s",curr_pid,dir);
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -79,7 +76,7 @@ int search_for_filenames(char* dir, char* pattern, int details_mode)
 void compare_name_with_pattern(char* fulldir, char* pattern,char* filename,const int details_mode) 
 {
 	if (details_mode)
-		//syslog(LOG_INFO, "Comparing '%s' with '%s'", filename, pattern); //wylaczone do debug
+		//syslog(LOG_INFO, "Process %d Comparing '%s' with '%s'",curr_pid ,filename, pattern); //wylaczone do debug
 
 	//Wypisanie do loga w przypadku znalezienia podci¹gu
 	if (strstr(filename, pattern) != NULL)

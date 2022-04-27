@@ -11,14 +11,12 @@
       "debuggerConfiguration": "gdb",
       "args": [
         "-v",
-        "-s 10",
+        "-s 30",
         "argumentt",
         "costam",
-        "niewiemcowpisac",
         "chodzioczas",
         "madlugozajac",
-        "lolsiemacotam",
-        "disajb"
+        "lolsiemacotam"
       ],
       "env": {}
     }

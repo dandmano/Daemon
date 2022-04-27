@@ -66,10 +66,9 @@ int main(int argc, char* argv[])
 	} 
 
 	//Obsługa sygnałów
-	signal(SIGCHLD, SIG_IGN);
 	signal(SIGHUP, SIG_IGN);
-	signal(SIGUSR1, signal_handler);
-	signal(SIGUSR2, signal_handler);
+	signal(SIGUSR1, signal_handler_supervisor);
+	signal(SIGUSR2, signal_handler_supervisor);
 
 	//Zamknięcie standardowych deskryptorów plików
 	close(STDIN_FILENO);
@@ -92,29 +91,61 @@ int main(int argc, char* argv[])
 		close(x);
 	}
 
+	
+
 	//Pętla główna deamona
 	while (1) {
 		//Obudzenie deamona
 		is_sleeping = 0;
 		if (details_mode)
-			syslog(LOG_INFO, "Searching for files with names containg given substrings.");
+			syslog(LOG_INFO, "Process -%d- Searching for files with names containg given substrings.",getpid());
+
+		amount_of_processes = argc - optind;
+		child_processes = malloc((amount_of_processes) * sizeof(pid_t));
 
 		//Dla każdego argumentu wywoływana jest funkcja poszukująca
-		for (int i = optind; i < argc; i++) {
-			if (search_for_filenames(cwd,argv[i],details_mode) == -1)
+		for (int i = optind, x=0; i < argc; i++, x++) 
+		{
+			pid = fork();
+			//Sprawdzenie czy nie wystąpił bład
+			if (pid < 0)
 			{
-				syslog(LOG_INFO, "ERROR! Searching for names exited with -1");
+				syslog(LOG_INFO, "ERROR! Forking in for error");
 				exit(EXIT_FAILURE);
 			}
-			if (signal1_recieved || signal2_recieved)break;
+			
+			//Zapisanie pid'ów potomnych procesów przez proces nadzorczy
+			if(pid>0)child_processes[x] = pid;
+			curr_pid = getpid();
+
+			//Zadania dla każdego procesu-dziecka
+			//Przekierowanie sygnałow, oraz wywowałnie funkcji wyszukującej
+			if (pid == 0)
+			{
+				signal(SIGUSR1, signal_handler_child);
+				signal(SIGUSR2, signal_handler_child);
+				free(child_processes);
+				if (search_for_filenames(cwd, argv[i], details_mode) == -1)
+				{
+					syslog(LOG_INFO, "ERROR! Searching for names exited with -1");
+					exit(EXIT_FAILURE);
+				}
+				syslog(LOG_INFO, "KILLING PROCESS! %d ",curr_pid);
+				exit(EXIT_SUCCESS);
+				syslog(LOG_INFO, "PROCESS NOT KILED!!!EWSADWAD %d", curr_pid);
+			}
 		}
-		
+
+		int status;
+		pid_t tmppid;
+		while (tmppid = wait(&status)>0&&!signal1_recieved&&!signal2_recieved);
+
 		//W przypadku otrzymania sigusr1, przeszukiwanie się restartuje
 		if (signal1_recieved) 
 		{
 			signal1_recieved = 0;
 			if (details_mode)
-				syslog(LOG_INFO, "Search restart.");
+				syslog(LOG_INFO, "SIGUSR1 recieved, search restart.");
 			continue;
 		}
 
@@ -127,8 +158,10 @@ int main(int argc, char* argv[])
 		}
 
 		if (details_mode)
-			syslog(LOG_INFO, "Daemon sleeping for %d", sleep_time);
+			syslog(LOG_INFO, "Process -%d- Daemon sleeping for %d",getpid(), sleep_time);
 
+		if(pid>0)
+			free(child_processes);
 		//Uśpienie deamona
 		is_sleeping = 1;
 		sleep(sleep_time);
