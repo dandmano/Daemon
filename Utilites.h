@@ -15,6 +15,7 @@
 extern int details_mode;
 extern int is_sleeping;
 extern int sleep_time;
+extern int sleep_time_left;
 extern int signal1_recieved;
 extern int signal2_recieved;
 extern pid_t* child_processes;

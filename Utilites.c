@@ -3,11 +3,12 @@
 int details_mode = 0; //-v tryb wyœwietlaj¹cy szczegó³y
 int is_sleeping = 0; //0-daemon przeszukuje, 1-daemon œpi
 int sleep_time = 120; //czas uœpienia daemona, domyœlnie 120s
+int sleep_time_left = 0; //w przypadku obudzenia deamona niechcianym sygna³em, wykorzystywane do dalszego uœpienia
 int signal1_recieved = 0; //0-nieotrzymano sygna³u 1-otrzymano sygna³
 int signal2_recieved = 0; //0-nieotrzymano sygna³u 1-otrzymano sygna³
-pid_t* child_processes;
-int amount_of_processes;
-pid_t curr_pid;
+pid_t* child_processes; //id procesów potomnych
+int amount_of_processes; //iloœæ procesów potomnych
+pid_t curr_pid; //id aktualnego procesu
 
 //Funkcja sprawdza czy plik ma prawa odczytu i pisania dla grupy
 int check_file_perm(const struct stat path_stat)
@@ -49,13 +50,29 @@ void signal_handler_child(int signum)
 //Obs³uga sygna³ów przez proces nadzorczy
 void signal_handler_supervisor(int signum)
 {
-	if (signum == SIGUSR1)
+	//Je¿eli daemon œpi i otrzyma sigusr1 to siê budzi
+	if (is_sleeping)
+	{
+		if (signum == SIGUSR1)
+		{
+			is_sleeping = 0;
+			if (details_mode)
+				syslog(LOG_INFO, "SIGUSR1 recieved, Daemon awoken.");
+		}
+		//W wypadku gdy daemon zosta³ obudzony przez sygna³ inny ni¿ sigusr1 to kontynuuje spanie
+		else if(sleep_time_left!=0)
+		{
+			sleep_time_left = sleep(sleep_time_left);
+		}
+	}
+	//Je¿eli nie œpi i otrzyma sigusr1 to przesy³a im ten sygna³
+	else if (signum == SIGUSR1)
 	{ 
 		signal1_recieved = 1;
 		for (int i = 0; i < amount_of_processes; i++)
 			kill(child_processes[i], SIGUSR1);
 	}
-	//W wypadku wykrycia sigusr2 daemon, je¿eli nie œpi to przestaje szukaæ i siê usypia.
+	//W wypadku wykrycia sigusr2 daemon, je¿eli nie œpi to przesy³a sygna³ potomnym i siê usypia.
 	else if (signum == SIGUSR2)
 	{
 		signal2_recieved = 1;

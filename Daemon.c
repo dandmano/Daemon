@@ -91,7 +91,6 @@ int main(int argc, char* argv[])
 		close(x);
 	}
 
-	
 
 	//Pętla główna deamona
 	while (1) {
@@ -130,12 +129,11 @@ int main(int argc, char* argv[])
 					syslog(LOG_INFO, "ERROR! Searching for names exited with -1");
 					exit(EXIT_FAILURE);
 				}
-				syslog(LOG_INFO, "KILLING PROCESS! %d ",curr_pid);
 				exit(EXIT_SUCCESS);
-				syslog(LOG_INFO, "PROCESS NOT KILED!!!EWSADWAD %d", curr_pid);
 			}
 		}
 
+		//Proces nadzorczy oczekuje na sygnał bądź zakończenie wszystkich procesów potomnych
 		int status;
 		pid_t tmppid;
 		while (tmppid = wait(&status)>0&&!signal1_recieved&&!signal2_recieved);
@@ -158,13 +156,13 @@ int main(int argc, char* argv[])
 		}
 
 		if (details_mode)
-			syslog(LOG_INFO, "Process -%d- Daemon sleeping for %d",getpid(), sleep_time);
+			syslog(LOG_INFO, "Process -%d- Daemon sleeping for %d seconds",getpid(), sleep_time);
 
 		if(pid>0)
 			free(child_processes);
 		//Uśpienie deamona
 		is_sleeping = 1;
-		sleep(sleep_time);
+		sleep_time_left=sleep(sleep_time);
 	}
 	exit(EXIT_SUCCESS);
 }
