@@ -91,7 +91,6 @@ int main(int argc, char* argv[])
 		close(x);
 	}
 
-
 	//Pętla główna deamona
 	while (1) {
 		//Obudzenie deamona
@@ -124,7 +123,7 @@ int main(int argc, char* argv[])
 				signal(SIGUSR1, signal_handler_child);
 				signal(SIGUSR2, signal_handler_child);
 				free(child_processes);
-				if (search_for_filenames(cwd, argv[i], details_mode) == -1)
+				if (search_for_filenames(cwd, argv[i]) == -1)
 				{
 					syslog(LOG_INFO, "ERROR! Searching for names exited with -1");
 					exit(EXIT_FAILURE);
@@ -142,6 +141,7 @@ int main(int argc, char* argv[])
 		if (signal1_recieved) 
 		{
 			signal1_recieved = 0;
+			free(child_processes);
 			if (details_mode)
 				syslog(LOG_INFO, "SIGUSR1 recieved, search restart.");
 			continue;

@@ -2,7 +2,7 @@
 #include "Utilites.h"
 
 //Rekurencyjna funkcja poszukuj¹ca plików posiadaj¹cych podany wzór w nazwie
-int search_for_filenames(char* dir, char* pattern, int details_mode) 
+int search_for_filenames(char* dir, char* pattern) 
 {
 	//Przejœcie deamonem do aktualnie przegl¹danej lokalizacji
 	if ((chdir(dir)) < 0) {
@@ -22,8 +22,6 @@ int search_for_filenames(char* dir, char* pattern, int details_mode)
 	
 	while ((dp = readdir(dfd)) != NULL)
 	{
-		if (signal1_recieved||signal2_recieved)return 0;
-
 		char filename[256];
 		char fulldir[PATH_MAX];
 
@@ -46,17 +44,17 @@ int search_for_filenames(char* dir, char* pattern, int details_mode)
 		//Pomijanie syslinków
 		if (is_syslink(path_stat))continue;
 
+		//Omiñ folder je¿eli grupa nie ma uprawnieñ czytania lub wykonania
+		if (check_file_perm(path_stat))continue;
+
 		//Sprawdzanie katalogów
 		if (is_directory(path_stat))
 		{
-			//Omiñ folder je¿eli grupa nie ma uprawnieñ czytania lub wykonania
-			if (check_file_perm(path_stat))continue;
-
 			//Porównaj nazwê ze wzorem
 			compare_name_with_pattern(fulldir, pattern, filename, details_mode);
 
 			//Rekurencja
-			search_for_filenames(fulldir, pattern, details_mode);
+			search_for_filenames(fulldir, pattern);
 
 			//Powrót deamonem do lokalizacji z przed rekurencji
 			if ((chdir(dir)) < 0) {
