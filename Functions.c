@@ -74,7 +74,7 @@ int search_for_filenames(char* dir, char* pattern)
 void compare_name_with_pattern(char* fulldir, char* pattern,char* filename,const int details_mode) 
 {
 	if (details_mode)
-		//syslog(LOG_INFO, "Process %d Comparing '%s' with '%s'",curr_pid ,filename, pattern); //wylaczone do debug
+		syslog(LOG_INFO, "Process %d Comparing '%s' with '%s'",curr_pid ,fulldir, pattern); 
 
 	//Wypisanie do loga w przypadku znalezienia podci¹gu
 	if (strstr(filename, pattern) != NULL)

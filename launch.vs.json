@@ -10,13 +10,10 @@
       "comment": "Looking for files Daemon",
       "debuggerConfiguration": "gdb",
       "args": [
-        "-v",
-        "-s 20",
-        "argumentt",
+        "szukanywzor",
         "costam",
-        "chodzioczas",
-        "madlugozajac",
-        "lolsiemacotam"
+        "trzeciarg",
+        "tegonigdzieniema"
       ],
       "env": {}
     }
